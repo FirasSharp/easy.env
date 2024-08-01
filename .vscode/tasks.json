@@ -1,0 +1,54 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "wails-dev",
+      "type": "shell",
+      "command": "wails",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "args": [
+        "dev",
+      ],
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": "__________________"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": "To develop in the browser and call your bound Go methods from Javascript, navigate to: *"
+        }
+      }
+    },
+    {
+      "label": "dlv-server",
+      "type": "shell",
+      "command": "python.exe",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": "__________________"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": "API server listening at: *"
+        }
+      },
+      "args": [
+        "debug.py",
+      ],
+      "dependsOn": [
+        "wails-dev"
+      ]
+    },
+  ]
+}
