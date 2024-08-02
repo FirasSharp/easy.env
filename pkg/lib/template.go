@@ -6,6 +6,13 @@ import (
 	"github.com/google/uuid"
 )
 
+type Template struct {
+	templateID   string
+	templateName string
+	deleted      bool
+	values       []*DataSet
+}
+
 // Constructor
 func NewTemplate(templateName string) *Template {
 	template := new(Template)

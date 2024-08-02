@@ -9,6 +9,15 @@ import (
 	"github.com/google/uuid"
 )
 
+
+type Project struct {
+	projectID   string
+	projectName string
+	path        string // absolute path of the project containing the .env file
+	deleted     bool
+	values      []*DataSet
+}
+
 // constructor
 
 func NewProject(projectName, path string) *Project {

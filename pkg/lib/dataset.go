@@ -1,5 +1,11 @@
 package easyenv
 
+type DataSet struct {
+	keyName string
+	value   string
+	deleted bool
+}
+
 // constructor
 
 func NewDataSet(keyName, value string) *DataSet {
