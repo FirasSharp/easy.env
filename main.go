@@ -29,6 +29,7 @@ func main() {
 			app,
 		},
 		Frameless: false,
+		DisableResize: true,
 	})
 
 	if err != nil {

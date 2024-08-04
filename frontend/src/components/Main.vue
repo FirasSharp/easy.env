@@ -1,11 +1,9 @@
-<script setup>
-</script>
+<script setup></script>
 
 <template>
   <main>
-    <slot></slot>
+
   </main>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	easyenv "github.com/FriscPlusPlus/easy.env/pkg/lib"
+	easyenv "github.com/FriscPlusPlus/easy.env/pkg/easyenvlib"
 )
 
 // App struct
