@@ -1,19 +1,12 @@
-import { build, defineConfig, normalizePath  } from "vite";
-import { viteStaticCopy } from 'vite-plugin-static-copy'
+import { build, defineConfig, normalizePath } from "vite";
+//import { viteStaticCopy } from "vite-plugin-static-copy";
 import vue from "@vitejs/plugin-vue";
-import path from 'node:path'
+//import path from "node:path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   build: {
-    sourcemap: 'inline',
+    sourcemap: "inline",
   },
-  plugins: [vue(), viteStaticCopy({
-    targets: [
-      {
-        src: normalizePath(path.resolve(__dirname, 'lib/xel')),
-        dest: 'lib'
-      }
-    ]
-  })],
+  plugins: [vue()],
 });

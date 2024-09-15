@@ -17,7 +17,7 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:  "easy.env",
+		Title:  "Easy Env",
 		Width:  1024,
 		Height: 768,
 		AssetServer: &assetserver.Options{
@@ -28,7 +28,7 @@ func main() {
 		Bind: []interface{}{
 			app,
 		},
-		Frameless: false,
+		Frameless:     false,
 		DisableResize: true,
 	})
 
