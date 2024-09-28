@@ -4,7 +4,7 @@ import "primeicons/primeicons.css";
 import Toolbar from "primevue/toolbar";
 import Tree from "primevue/tree";
 import { ref } from "vue";
-
+import { FilePrompt, ListDatabases } from "../../wailsjs/go/main/App";
 const nodes = ref();
 const selectedKey = ref(null);
 const emits = defineEmits(["envsChanged"]);
@@ -16,14 +16,21 @@ nodes.value = [
     icon: "pi pi-fw pi-database",
     children: [
       {
-        key: "51c6da3b-af53-4e46-bca4-b36ba2cb96b8",
-        label: "exampleProject12323",
+        key: "project",
+        label: "Projects",
         icon: "pi pi-fw pi-file",
-        path: `C:\\Users\\Firas\\Desktop\\git\\easy.env-lib\\_examples\\project`,
-        envs: [
-          { key: "aaa", value: "wwwe" },
-          { key: "aaa213", value: "wwwe3424" },
-          { key: "aaatt", value: "www23432e" },
+        children: [
+          {
+            key: "51c6da3b-af53-4e46-bca4-b36ba2cb96b8",
+            label: "exampleProject12323",
+            icon: "pi pi-fw pi-table",
+            path: `C:\\Users\\Firas\\Desktop\\git\\easy.env-lib\\_examples\\project`,
+            envs: [
+              { key: "aaa", value: "wwwe" },
+              { key: "aaa213", value: "wwwe3424" },
+              { key: "aaatt", value: "www23432e" },
+            ],
+          },
         ],
       },
     ],
@@ -37,6 +44,15 @@ const onNodeSelect = (e) => {
   ]);
   console.log("123");
 };
+const onOpenDB = async () => {
+  var ok = await FilePrompt();
+  if (ok) {
+    var db = ListDatabases();
+    console.log(db)
+  } else {
+    debugger;
+  }
+};
 </script>
 <template>
   <Toolbar>
@@ -46,12 +62,15 @@ const onNodeSelect = (e) => {
 
     <template #end>
       <Button
-        label="open"
+        aria-label="Open database"
+        aria-placeholder="Open database"
+        placeholder="Open database"
         icon="pi pi-folder-open"
         severity="secondary"
         text
         outlined
         size="small"
+        @click="onOpenDB"
       />
     </template>
   </Toolbar>

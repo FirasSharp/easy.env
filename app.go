@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
 	easyenv "github.com/FriscPlusPlus/easy.env/pkg/easyenvlib"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
@@ -24,23 +24,21 @@ func (a *App) startup(ctx context.Context) {
 	a.easy = easyenv.NewEasyEnv()
 }
 
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
-}
-
-func (a *App) MyTest(name string) string {
-	return fmt.Sprintf("Hey %s, you are a wanama", name)
-}
-
-func (a *App) LoadDB(path string) error {
-	_, err := a.easy.Load(path)
+func (a *App) FilePrompt() bool {
+	file, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{})
 	if err != nil {
-		return err
+		return false
 	}
-	return nil
+	_, err = a.easy.Load(file)
+
+	return err == nil
 }
 
-func (a *App) GetProjects() string {
-	return ""
+func (a *App) ListDatabases() []string {
+	dbs := a.easy.GetDatabases()
+	var dbNames []string
+	for _, db := range dbs {
+		dbNames = append(dbNames, db.Name)
+	}
+	return dbNames
 }

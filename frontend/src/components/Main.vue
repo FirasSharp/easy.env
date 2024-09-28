@@ -2,6 +2,7 @@
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Toolbar from "primevue/toolbar";
+import Button from "primevue/button";
 const props = defineProps(["envs"]);
 </script>
 
@@ -14,7 +15,7 @@ const props = defineProps(["envs"]);
     <template #end>
       <Button
         label="import from template"
-        icon="pi pi-folder-open"
+        icon="pi pi-file-import"
         severity="secondary"
         text
         outlined

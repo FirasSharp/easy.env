@@ -3,6 +3,8 @@ package easyenv
 import (
 	"database/sql"
 	"fmt"
+	"os"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -13,7 +15,8 @@ type EasyEnv struct {
 }
 
 type Connection struct {
-	dbName    string      // db absolute path
+	Name      string      // db file name
+	dbPath    string      // db absolute path (acts like an id too)
 	db        *sql.DB     // db instance
 	projects  []*Project  // projects and the associated env data
 	templates []*Template // templates of all the envs
@@ -27,20 +30,20 @@ func NewEasyEnv() *EasyEnv {
 	Unexported methods
 */
 
-func (easy *EasyEnv) getConnectionByDBname(dbName string) (*Connection, error) {
+func (easy *EasyEnv) getConnectionBydbPath(dbPath string) (*Connection, error) {
 	for _, connection := range easy.connections {
-		if connection.dbName == dbName {
+		if connection.dbPath == dbPath {
 			return connection, nil
 		}
 	}
-	return nil, fmt.Errorf("no connection found for the database with the name: %s", dbName)
+	return nil, fmt.Errorf("no connection found for the database with the name: %s", dbPath)
 }
 
-func (easy *EasyEnv) removeConnection(dbName string) {
+func (easy *EasyEnv) removeConnection(dbPath string) {
 	tmp := make([]*Connection, 0)
 	foundIndex := 0
 	for index, connection := range easy.connections {
-		if connection.dbName == dbName {
+		if connection.dbPath == dbPath {
 			foundIndex = index
 			break
 		}
@@ -59,8 +62,8 @@ func (easy *EasyEnv) isCurrentDBSet() error {
 	return nil
 }
 
-func (easy *EasyEnv) Load(dbName string) (*Connection, error) {
-	db, err := sql.Open("sqlite3", dbName)
+func (easy *EasyEnv) Load(dbPath string) (*Connection, error) {
+	db, err := sql.Open("sqlite3", dbPath)
 
 	connection := new(Connection)
 
@@ -68,16 +71,18 @@ func (easy *EasyEnv) Load(dbName string) (*Connection, error) {
 		return nil, err
 	}
 
-	connection.dbName = dbName
+	connection.dbPath = dbPath
 	connection.db = db
+	splittedPath := strings.Split(dbPath, string(os.PathSeparator))
+	connection.Name = splittedPath[len(splittedPath)-1]
 
 	easy.connections = append(easy.connections, connection)
 	easy.currentConnection = connection
 	return easy.currentConnection, nil
 }
 
-func (easy *EasyEnv) Open(dbName string) (*Connection, error) {
-	connection, err := easy.getConnectionByDBname(dbName)
+func (easy *EasyEnv) Open(dbPath string) (*Connection, error) {
+	connection, err := easy.getConnectionBydbPath(dbPath)
 
 	if err != nil {
 		return nil, err
@@ -87,8 +92,8 @@ func (easy *EasyEnv) Open(dbName string) (*Connection, error) {
 	return connection, nil
 }
 
-func (easy *EasyEnv) CloseDB(dbName string) error {
-	connection, err := easy.getConnectionByDBname(dbName)
+func (easy *EasyEnv) CloseDB(dbPath string) error {
+	connection, err := easy.getConnectionBydbPath(dbPath)
 
 	if err != nil {
 		return err
@@ -100,17 +105,17 @@ func (easy *EasyEnv) CloseDB(dbName string) error {
 		return err
 	}
 
-	easy.removeConnection(dbName)
+	easy.removeConnection(dbPath)
 
-	if easy.currentConnection.dbName == dbName {
+	if easy.currentConnection.dbPath == dbPath {
 		easy.currentConnection = nil
 	}
 
 	return nil
 }
 
-func (easy *EasyEnv) CreateNewDB(dbName string) (*Connection, error) {
-	connection, err := easy.Load(dbName)
+func (easy *EasyEnv) CreateNewDB(dbPath string) (*Connection, error) {
+	connection, err := easy.Load(dbPath)
 
 	if err != nil {
 		return nil, err
@@ -262,8 +267,12 @@ func (easy *EasyEnv) AddTemplateEnvsToProject(templateID, projectID string) erro
 	for _, env := range envs {
 		project.AddEnvironment(env.GetKey(), env.GetValue())
 	}
-	
+
 	return nil
+}
+
+func (easy *EasyEnv) GetDatabases() []*Connection {
+	return easy.connections
 }
 
 func (easy *EasyEnv) GetProject(projectID string) (int, *Project, error) {

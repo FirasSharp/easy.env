@@ -26,10 +26,4 @@ const onEnvsChanged = (e) => {
 .full-height {
   height: 100%;
 }
-.side {
-  background-color: #161618;
-}
-.main {
-  background-color: #212124;
-}
 </style>
