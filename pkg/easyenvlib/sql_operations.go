@@ -68,7 +68,7 @@ func saveDataInDB(connection *Connection) error {
 }
 
 func selectProjects(connection *Connection) (map[string]*Project, error) {
-	var result map[string]*Project
+	result := make(map[string]*Project)
 	db := connection.db
 	query := "SELECT * FROM projects"
 
@@ -96,8 +96,8 @@ func selectProjects(connection *Connection) (map[string]*Project, error) {
 	return result, nil
 }
 
-func selectTemplates(connection *Connection) ([]*Template, error) {
-	var result []*Template
+func selectTemplates(connection *Connection) (map[string]*Template, error) {
+	result := make(map[string]*Template)
 	db := connection.db
 	query := "SELECT * FROM templates"
 
@@ -124,7 +124,7 @@ func selectTemplates(connection *Connection) ([]*Template, error) {
 			return nil, err
 		}
 
-		result = append(result, template)
+		result[template.templateID] = template
 	}
 
 	return result, nil
