@@ -15,11 +15,11 @@ type EasyEnv struct {
 }
 
 type Connection struct {
-	Name      string      // db file name
-	dbPath    string      // db absolute path (acts like an id too)
-	db        *sql.DB     // db instance
-	projects  []*Project  // projects and the associated env data
-	templates []*Template // templates of all the envs
+	Name      string              // db file name
+	dbPath    string              // db absolute path (acts like an id too)
+	db        *sql.DB             // db instance
+	projects  map[string]*Project // projects and the associated env data
+	templates []*Template         // templates of all the envs
 }
 
 func NewEasyEnv() *EasyEnv {
@@ -75,6 +75,7 @@ func (easy *EasyEnv) Load(dbPath string) (*Connection, error) {
 	connection.db = db
 	splittedPath := strings.Split(dbPath, string(os.PathSeparator))
 	connection.Name = splittedPath[len(splittedPath)-1]
+	connection.projects = make(map[string]*Project)
 
 	easy.connections = append(easy.connections, connection)
 	easy.currentConnection = connection
@@ -193,7 +194,7 @@ func (easy *EasyEnv) AddProject(projectName, path string) (*Project, error) {
 
 	project := NewProject(projectName, path)
 
-	easy.currentConnection.projects = append(easy.currentConnection.projects, project)
+	easy.currentConnection.projects[project.projectID] = project
 
 	return project, nil
 }
@@ -216,7 +217,7 @@ func (easy *EasyEnv) AddTemplate(templateName string) (*Template, error) {
  Getters
 */
 
-func (easy *EasyEnv) LoadProjects() ([]*Project, error) {
+func (easy *EasyEnv) LoadProjects() (map[string]*Project, error) {
 	projects, err := selectProjects(easy.currentConnection)
 
 	if err != nil {
@@ -250,7 +251,7 @@ func (easy *EasyEnv) LoadTemplates() ([]*Template, error) {
 }
 
 func (easy *EasyEnv) AddTemplateEnvsToProject(templateID, projectID string) error {
-	_, project, err := easy.GetProject(projectID)
+	project, err := easy.GetProject(projectID)
 
 	if err != nil {
 		return err
@@ -275,27 +276,24 @@ func (easy *EasyEnv) GetDatabases() []*Connection {
 	return easy.connections
 }
 
-func (easy *EasyEnv) GetProject(projectID string) (int, *Project, error) {
+func (easy *EasyEnv) GetProject(projectID string) (*Project, error) {
 
 	err := easy.isCurrentDBSet()
 
 	if err != nil {
-		return 0, nil, err
+		return nil, err
 	}
 
-	foundIndex := 0
-	var foundProject *Project
-	for index, project := range easy.currentConnection.projects {
-		if project.GetProjectID() == projectID {
-			foundIndex = index
-			foundProject = project
-			return foundIndex, foundProject, nil
-		}
+	project, ok := easy.currentConnection.projects[projectID]
+
+	if !ok {
+		return nil, fmt.Errorf("no project found with ID %s. Please check the ID and try again", projectID)
 	}
-	return foundIndex, foundProject, fmt.Errorf("no project found with ID %s. Please check the ID and try again", projectID)
+
+	return project, nil
 }
 
-func (easy *EasyEnv) GetProjects() ([]*Project, error) {
+func (easy *EasyEnv) GetProjects() (map[string]*Project, error) {
 	err := easy.isCurrentDBSet()
 
 	if err != nil {

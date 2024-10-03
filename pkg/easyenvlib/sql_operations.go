@@ -67,8 +67,8 @@ func saveDataInDB(connection *Connection) error {
 	return err
 }
 
-func selectProjects(connection *Connection) ([]*Project, error) {
-	var result []*Project
+func selectProjects(connection *Connection) (map[string]*Project, error) {
+	var result map[string]*Project
 	db := connection.db
 	query := "SELECT * FROM projects"
 
@@ -90,7 +90,7 @@ func selectProjects(connection *Connection) ([]*Project, error) {
 		project := NewProject(projectName, path)
 		project.projectID = projectID
 
-		result = append(result, project)
+		result[project.projectID] = project
 	}
 
 	return result, nil
