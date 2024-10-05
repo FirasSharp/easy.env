@@ -9,13 +9,12 @@ import (
 	"github.com/google/uuid"
 )
 
-
 type Project struct {
 	projectID   string
 	projectName string
 	path        string // absolute path of the project containing the .env file
 	deleted     bool
-	values      []*DataSet
+	values      map[string]*DataSet
 }
 
 // constructor
@@ -26,6 +25,7 @@ func NewProject(projectName, path string) *Project {
 	project.projectID = uuid.NewString()
 	project.SetProjectName(projectName)
 	project.SetPath(path)
+	project.values = make(map[string]*DataSet)
 
 	return project
 }
@@ -49,7 +49,7 @@ func (prj *Project) AddEnvironment(keyName, value string) (*DataSet, error) {
 	}
 
 	env := NewDataSet(keyName, value)
-	prj.values = append(prj.values, env)
+	prj.values[keyName] = env
 	return env, nil
 }
 
@@ -58,29 +58,12 @@ func (prj *Project) Remove() {
 }
 
 func (prj *Project) RemoveEnviorment(keyName string) {
-
-	tmp := make([]*DataSet, 0)
-	foundIndex := 0
-	for index, env := range prj.values {
-		if env.keyName == keyName {
-			foundIndex = index
-			break
-		}
-	}
-	tmp = append(tmp, prj.values[:foundIndex]...)
-	tmp = append(tmp, prj.values[foundIndex+1:]...)
-
-	prj.values = tmp
+	delete(prj.values, keyName)
 }
 
 func (prj *Project) RemoveAllEnviorments() error {
-	err := os.Remove(prj.path)
 
-	if err != nil {
-		return err
-	}
-
-	prj.values = []*DataSet{}
+	prj.values = make(map[string]*DataSet)
 
 	return nil
 }
@@ -99,19 +82,18 @@ func (prj *Project) GetPath() string {
 	return prj.path
 }
 
-func (prj *Project) GetEnvironments() []*DataSet {
+func (prj *Project) GetEnvironments() map[string]*DataSet {
 	return prj.values
 }
 
 func (prj *Project) GetEnvironmentByKey(keyName string) (*DataSet, error) {
+	env, ok := prj.values[keyName]
 
-	for _, env := range prj.values {
-		if env.keyName == keyName {
-			return env, nil
-		}
+	if !ok {
+		return nil, fmt.Errorf("no enviorment found with the key %s", keyName)
 	}
 
-	return nil, fmt.Errorf("no enviorment found with the key %s", keyName)
+	return env, nil
 }
 
 func (prj *Project) LoadEnvironmentsFromFile() error {
@@ -159,7 +141,7 @@ func (prj *Project) SaveEnvironmentsToFile() error {
 	return err
 }
 
-func createEnvString(environments []*DataSet) string {
+func createEnvString(environments map[string]*DataSet) string {
 	var result string
 
 	for _, env := range environments {

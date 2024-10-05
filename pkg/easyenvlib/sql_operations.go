@@ -130,8 +130,8 @@ func selectTemplates(connection *Connection) (map[string]*Template, error) {
 	return result, nil
 }
 
-func selectTemplateEnvironments(connection *Connection, templateID string) ([]*DataSet, error) {
-	var result []*DataSet
+func selectTemplateEnvironments(connection *Connection, templateID string) (map[string]*DataSet, error) {
+	result := make(map[string]*DataSet)
 	db := connection.db
 	query := "SELECT keyName, value FROM templateValues WHERE templateID = ?"
 
@@ -150,7 +150,7 @@ func selectTemplateEnvironments(connection *Connection, templateID string) ([]*D
 		}
 
 		env := NewDataSet(keyName, value)
-		result = append(result, env)
+		result[keyName] = env
 	}
 
 	return result, nil

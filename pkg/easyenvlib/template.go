@@ -10,13 +10,14 @@ type Template struct {
 	templateID   string
 	templateName string
 	deleted      bool
-	values       []*DataSet
+	values       map[string]*DataSet
 }
 
 // Constructor
 func NewTemplate(templateName string) *Template {
 	template := new(Template)
 	template.templateID = uuid.NewString()
+	template.values = make(map[string]*DataSet)
 	template.SetTemplateName(templateName)
 	return template
 }
@@ -30,17 +31,18 @@ func (template *Template) GetTemplateName() string {
 	return template.templateName
 }
 
-func (template *Template) GetEnvironments() []*DataSet {
+func (template *Template) GetEnvironments() map[string]*DataSet {
 	return template.values
 }
 
 func (template *Template) GetEnvironmentByKey(keyName string) (*DataSet, error) {
-	for _, env := range template.values {
-		if env.keyName == keyName {
-			return env, nil
-		}
+
+	env, ok := template.values[keyName]
+
+	if !ok {
+		return nil, fmt.Errorf("no environment found with the key %s", keyName)
 	}
-	return nil, fmt.Errorf("no environment found with the key %s", keyName)
+	return env, nil
 }
 
 // Setters
@@ -49,7 +51,7 @@ func (template *Template) SetTemplateName(templateName string) {
 }
 
 func (template *Template) AddEnvironment(keyName, value string) (*DataSet, error) {
-	
+
 	_, ok := template.GetEnvironmentByKey(keyName)
 
 	if ok == nil {
@@ -57,7 +59,7 @@ func (template *Template) AddEnvironment(keyName, value string) (*DataSet, error
 	}
 
 	env := NewDataSet(keyName, value)
-	template.values = append(template.values, env)
+	template.values[keyName] = env
 	return env, nil
 }
 
@@ -69,16 +71,10 @@ func (template *Template) Remove() {
 }
 
 func (template *Template) RemoveEnvironment(keyName string) {
-	var tmp []*DataSet
-	for _, env := range template.values {
-		if env.keyName != keyName {
-			tmp = append(tmp, env)
-		}
-	}
-	template.values = tmp
+	delete(template.values, keyName)
 }
 
 // This method will remove the environment
 func (template *Template) RemoveAllEnvironments() {
-	template.values = []*DataSet{}
+	template.values = make(map[string]*DataSet)
 }
